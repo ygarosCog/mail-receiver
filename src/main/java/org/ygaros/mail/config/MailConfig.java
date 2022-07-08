@@ -88,7 +88,7 @@ public class MailConfig {
         ImapMailReceiver imapMailReceiver = new ImapMailReceiver(url);
         imapMailReceiver.setShouldMarkMessagesAsRead(true);
         imapMailReceiver.setShouldDeleteMessages(false);
-        imapMailReceiver.setMaxFetchSize(10);
+        //imapMailReceiver.setMaxFetchSize(10);
 
         return imapMailReceiver;
     }
