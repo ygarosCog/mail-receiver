@@ -22,17 +22,20 @@ public class MailReceiverService {
 
     public void handleReceivedMail(MimeMessage receivedMessage) {
         try (Folder folder = receivedMessage.getFolder()) {
-
+            /*
+                Folder needs to be opened in other case we will get FolderClosedException.
+             */
             folder.open(Folder.READ_ONLY);
             //folder.open(Folder.READ_WRITE);
 
+            //Get all messages from that folder (INBOX) in this case.
             Message[] messages = folder.getMessages();
 
             /*
                 Define what info we want to fetch.
                 It's not mandatory, we can reduce number of things to fetch.
 
-            https://jakarta.ee/specifications/mail/1.6/apidocs/javax/mail/FetchProfile.Item.html
+                https://jakarta.ee/specifications/mail/1.6/apidocs/javax/mail/FetchProfile.Item.html
             */
             FetchProfile contentsProfile = new FetchProfile();
             contentsProfile.add(FetchProfile.Item.ENVELOPE);
@@ -45,8 +48,6 @@ public class MailReceiverService {
                 https://jakarta.ee/specifications/mail/1.6/apidocs/com/sun/mail/imap/imapfolder#fetch-javax.mail.Message:A-javax.mail.FetchProfile-
              */
             folder.fetch(messages, contentsProfile);
-
-
             /*
                 We can fetch all mails inside INBOX (see imap url) folder which is default folder where new
                 messages get saved, so we need to filter them by id that we only fetch the one we want to process.
@@ -131,7 +132,7 @@ public class MailReceiverService {
             try {
                 Files.createDirectories(of);
             } catch (IOException e) {
-                log.error("An error: {} occurred during create folder: {}", e, directoryPath);
+                log.error("An error: {} on creating: {}", e, directoryPath);
             }
         }
     }
