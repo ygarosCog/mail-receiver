@@ -1,0 +1,17 @@
+logging:
+  level:
+    root: INFO
+    org.ygaros: DEBUG
+
+spring:
+  mail:
+    username: ${EMAIL_USERNAME}
+    password: ${EMAIL_PASS}
+    properties:
+      protocol: imaps
+      host: imap.gmail.com
+      mail:
+        imap:
+          port: 993
+
+
