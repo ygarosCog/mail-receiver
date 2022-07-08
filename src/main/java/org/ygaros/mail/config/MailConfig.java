@@ -43,15 +43,6 @@ public class MailConfig {
     private String IMAP_HOST;
 
     /*
-        Connect (subscribe) to incomingEmailsChannel channel and provide method to
-        handle each individual messages.
-     */
-    @ServiceActivator(inputChannel = "incomingEmailsChannel")
-    public void receive(Message<MimeMessage> message) {
-        receiverService.handleReceivedMail(message.getPayload());
-    }
-
-    /*
         Define a channel where we send and get the messages (mails in this example).
         MessageSource is sending messages to this channel.
         DirectChannel is a SubscribableChannel.
@@ -62,22 +53,7 @@ public class MailConfig {
         directChannel.setDatatypes(MimeMessage.class);
         return directChannel;
     }
-
-    /*
-        Provide MessageSource of Mails as spring integration Messages from ImapMailReceiver to be sent
-        through incomingEmailsChannel.
-        Poller with defines rate at which the messages are pushed to the channel
-        (if there are any) every 5 sec.
-     */
-    @Bean
-    @InboundChannelAdapter(
-            channel = "incomingEmailsChannel",
-            poller = @Poller(fixedDelay = "5000")
-    )
-    public MailReceivingMessageSource mailMessageSource(MailReceiver mailReceiver) {
-        return new MailReceivingMessageSource(mailReceiver);
-    }
-
+    
     @Bean
     public MailReceiver imapMailReceiver() {
         String url = String.format(
@@ -88,8 +64,32 @@ public class MailConfig {
         ImapMailReceiver imapMailReceiver = new ImapMailReceiver(url);
         imapMailReceiver.setShouldMarkMessagesAsRead(true);
         imapMailReceiver.setShouldDeleteMessages(false);
-        //imapMailReceiver.setMaxFetchSize(10);
+        //imapMailReceiver.setMaxFetchSize(1);
 
         return imapMailReceiver;
+    }
+
+    /*
+      Provide MessageSource of Mails as spring integration Messages from ImapMailReceiver to be sent
+      through incomingEmailsChannel.
+      Poller with defines rate at which the messages are pushed to the channel
+      (if there are any) every 5 sec.
+   */
+    @Bean
+    @InboundChannelAdapter(
+            channel = "incomingEmailsChannel",
+            poller = @Poller(fixedDelay = "5000")
+    )
+    public MailReceivingMessageSource mailMessageSource(MailReceiver mailReceiver) {
+        return new MailReceivingMessageSource(mailReceiver);
+    }
+
+    /*
+        Connect (subscribe) to incomingEmailsChannel channel and provide method to
+        handle each individual messages.
+     */
+    @ServiceActivator(inputChannel = "incomingEmailsChannel")
+    public void receive(Message<MimeMessage> message) {
+        receiverService.handleReceivedMail(message.getPayload());
     }
 }
