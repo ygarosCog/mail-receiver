@@ -33,7 +33,7 @@ public class MailConfig {
     @Value("${spring.mail.password}")
     private String PASSWORD;
 
-    @Value("${spring.mail.properties.mail.imap.port}")
+    @Value("${spring.mail.properties.port}")
     private int IMAP_PORT;
 
     @Value("${spring.mail.properties.protocol}")
@@ -53,7 +53,6 @@ public class MailConfig {
         directChannel.setDatatypes(MimeMessage.class);
         return directChannel;
     }
-    
     @Bean
     public MailReceiver imapMailReceiver() {
         String url = String.format(
@@ -64,6 +63,11 @@ public class MailConfig {
         ImapMailReceiver imapMailReceiver = new ImapMailReceiver(url);
         imapMailReceiver.setShouldMarkMessagesAsRead(true);
         imapMailReceiver.setShouldDeleteMessages(false);
+        /*
+            Attach content to message because by default the MimeMessage
+            doesn't contain content body.
+         */
+        imapMailReceiver.setSimpleContent(true);
         //imapMailReceiver.setMaxFetchSize(1);
 
         return imapMailReceiver;
@@ -72,16 +76,19 @@ public class MailConfig {
     /*
       Provide MessageSource of Mails as spring integration Messages from ImapMailReceiver to be sent
       through incomingEmailsChannel.
-      Poller with defines rate at which the messages are pushed to the channel
+      Poller with defined rate at which the messages are pushed to the channel
       (if there are any) every 5 sec.
    */
     @Bean
     @InboundChannelAdapter(
             channel = "incomingEmailsChannel",
             poller = @Poller(fixedDelay = "5000")
+
     )
     public MailReceivingMessageSource mailMessageSource(MailReceiver mailReceiver) {
-        return new MailReceivingMessageSource(mailReceiver);
+        MailReceivingMessageSource mailReceivingMessageSource = new MailReceivingMessageSource(mailReceiver);
+        return mailReceivingMessageSource;
+
     }
 
     /*
