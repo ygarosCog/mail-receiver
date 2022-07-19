@@ -1,9 +1,11 @@
 package org.ygaros.mail.service;
 
+import com.sun.mail.imap.IMAPFolder;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.core.io.FileSystemResource;
 import org.apache.commons.mail.util.MimeMessageParser;
+import org.springframework.mail.SimpleMailMessage;
 import org.springframework.stereotype.Service;
 
 import javax.activation.DataSource;
@@ -20,55 +22,8 @@ public class MailReceiverService {
     private static final Logger log = LoggerFactory.getLogger(MailReceiverService.class);
     private static final String ATTACHMENTS_FOLDER_STORE = "data";
 
-    public void handleReceivedMail(MimeMessage receivedMessage) {
-        try (Folder folder = receivedMessage.getFolder()) {
-            /*
-                Folder needs to be opened in other case we will get FolderClosedException.
-             */
-            folder.open(Folder.READ_ONLY);
-            //folder.open(Folder.READ_WRITE);
-
-            //Get all messages from that folder (INBOX) in this case.
-            Message[] messages = folder.getMessages();
-
-            /*
-                Define what info we want to fetch.
-                It's not mandatory, we can reduce number of things to fetch.
-
-                https://jakarta.ee/specifications/mail/1.6/apidocs/javax/mail/FetchProfile.Item.html
-            */
-            FetchProfile contentsProfile = new FetchProfile();
-            contentsProfile.add(FetchProfile.Item.ENVELOPE);
-            contentsProfile.add(FetchProfile.Item.CONTENT_INFO);
-            contentsProfile.add(FetchProfile.Item.FLAGS);
-            contentsProfile.add(FetchProfile.Item.SIZE);
-
-            /*
-                Prefetch attributes, based on the given FetchProfile.
-                https://jakarta.ee/specifications/mail/1.6/apidocs/com/sun/mail/imap/imapfolder#fetch-javax.mail.Message:A-javax.mail.FetchProfile-
-             */
-            folder.fetch(messages, contentsProfile);
-            /*
-                We can fetch all mails inside INBOX (see imap url) folder which is default folder where new
-                messages get saved, so we need to filter them by id that we only fetch the one we want to process.
-            */
-            for (Message value : messages) {
-                MimeMessage mimeMessage = (MimeMessage) value;
-                if (mimeMessage.getMessageID().equalsIgnoreCase(receivedMessage.getMessageID())) {
-                    extractMail(mimeMessage);
-                    break;
-                }
-            }
-
-            /*
-            receivedMessage.setFlag(Flags.Flag.DELETED, true); <- set flag value to delete message
-                To not delete the marked with DELETED flag messages we can use.
-            folder.close(false);
-                The try-with-resources uses folder.close(true); which deletes these messages.
-            */
-        } catch (Exception e) {
-            log.error(e.getMessage(), e);
-        }
+    public void handleReceivedMail(MimeMessage receivedMessage){
+        extractMail(receivedMessage);
     }
 
     private void extractMail(MimeMessage message) {
