@@ -10,8 +10,6 @@ spring:
     properties:
       protocol: imaps
       host: imap.gmail.com
-      mail:
-        imap:
-          port: 993
+      port: 993
 
 
