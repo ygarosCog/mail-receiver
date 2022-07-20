@@ -23,12 +23,8 @@ public class MailReceiverService {
     private static final String ATTACHMENTS_FOLDER_STORE = "data";
 
     public void handleReceivedMail(MimeMessage receivedMessage){
-        extractMail(receivedMessage);
-    }
-
-    private void extractMail(MimeMessage message) {
         try {
-            MimeMessageParser mimeMessageParser = new MimeMessageParser(message);
+            MimeMessageParser mimeMessageParser = new MimeMessageParser(receivedMessage);
             mimeMessageParser.parse();
 
             logMail(mimeMessageParser);
@@ -43,6 +39,7 @@ public class MailReceiverService {
             log.error(e.getMessage(), e);
         }
     }
+    
     private void logMail(MimeMessageParser mimeMessageParser) throws Exception {
         log.debug("From: {} To: {} Subject: {}",
                 mimeMessageParser.getFrom(), mimeMessageParser.getTo(), mimeMessageParser.getSubject());

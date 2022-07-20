@@ -86,8 +86,7 @@ public class MailConfig {
 
     )
     public MailReceivingMessageSource mailMessageSource(MailReceiver mailReceiver) {
-        MailReceivingMessageSource mailReceivingMessageSource = new MailReceivingMessageSource(mailReceiver);
-        return mailReceivingMessageSource;
+        return new MailReceivingMessageSource(mailReceiver);
 
     }
 
