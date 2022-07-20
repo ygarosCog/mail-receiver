@@ -1,15 +1,12 @@
 package org.ygaros.mail.service;
 
-import com.sun.mail.imap.IMAPFolder;
+import org.apache.commons.mail.util.MimeMessageParser;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.core.io.FileSystemResource;
-import org.apache.commons.mail.util.MimeMessageParser;
-import org.springframework.mail.SimpleMailMessage;
 import org.springframework.stereotype.Service;
 
 import javax.activation.DataSource;
-import javax.mail.*;
 import javax.mail.internet.MimeMessage;
 import java.io.*;
 import java.nio.file.Files;
@@ -39,7 +36,7 @@ public class MailReceiverService {
             log.error(e.getMessage(), e);
         }
     }
-    
+
     private void logMail(MimeMessageParser mimeMessageParser) throws Exception {
         log.debug("From: {} To: {} Subject: {}",
                 mimeMessageParser.getFrom(), mimeMessageParser.getTo(), mimeMessageParser.getSubject());
